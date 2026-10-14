@@ -1,0 +1,48 @@
+/* Case study + article pages (ported from legacy/assets/case-study.css). */
+/* =================== CASE STUDY ARTICLE =================== */
+.cs-hero{position:relative;z-index:2;padding-top:clamp(120px,18vh,160px)}
+.cs-back{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.06em;color:var(--muted);display:inline-flex;align-items:center;gap:8px;transition:.25s}
+.cs-back:hover{color:var(--sage)}
+.cs-tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage)}
+.cs-title{font-family:var(--font-display);font-weight:340;line-height:1.04;letter-spacing:-.02em;font-size:clamp(2.2rem,5.6vw,4.2rem);margin-top:16px;max-width:16ch}
+.cs-subtitle{color:var(--cream-dim);font-size:clamp(1rem,1.5vw,1.2rem);max-width:62ch;margin-top:20px;font-weight:350;line-height:1.6}
+
+.cs-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px;margin-top:40px;padding-top:32px;border-top:1px solid var(--border)}
+.cs-meta div b{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);display:block;margin-bottom:8px}
+.cs-meta div span{color:var(--cream-dim);font-size:.92rem;line-height:1.5;display:block}
+
+
+.cs-body{max-width:70ch;margin-top:8px}
+.cs-body h3{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin:48px 0 14px;display:flex;align-items:center;gap:8px}
+.cs-body h3:first-child{margin-top:0}
+.cs-body h4{font-family:var(--font-display);font-weight:440;font-size:1.15rem;color:var(--cream);margin:22px 0 8px;letter-spacing:-.01em}
+.cs-body p{color:var(--cream-dim);font-size:1rem;font-weight:350;line-height:1.72;margin-top:12px}
+.cs-body ul{list-style:none;margin-top:10px}
+.cs-body li{color:var(--cream-dim);font-size:.96rem;padding:8px 0 8px 20px;position:relative;border-bottom:1px solid var(--border);font-weight:350;line-height:1.55}
+.cs-body li::before{content:"→";position:absolute;left:0;color:var(--sage)}
+.cs-body li:last-child{border-bottom:none}
+
+.cs-skills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.cs-skills span{font-size:.78rem;color:var(--cream-dim);padding:7px 14px;border:1px solid var(--border);border-radius:100px;transition:.25s}
+.cs-skills span:hover{border-color:rgba(174,207,158,.3);color:var(--cream)}
+
+.cs-takeaway{margin-top:56px;padding:clamp(26px,4vw,42px) clamp(24px,4vw,40px);border-left:2px solid var(--sage);background:var(--panel);border-radius:0 var(--r) var(--r) 0}
+.cs-takeaway p{font-family:var(--font-display);font-style:italic;font-weight:340;font-size:clamp(1.15rem,2vw,1.4rem);line-height:1.5;color:var(--cream);letter-spacing:-.01em}
+
+.cs-foot-nav{margin-top:80px;padding-top:40px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px}
+.cs-foot-nav .cs-next{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.06em;color:var(--cream-dim);display:flex;align-items:center;gap:10px;transition:.25s}
+.cs-foot-nav .cs-next:hover{color:var(--sage)}
+.cs-foot-btn{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sage);padding:12px 22px;border:1px solid rgba(174,207,158,.3);border-radius:100px;transition:.35s var(--ease)}
+.cs-foot-btn:hover{background:var(--sage);color:var(--ink)}
+
+/* Body blocks the legacy pages never used (image + quote); styled to match the rest of .cs-body */
+.cs-figure{margin-top:28px}
+.cs-figure img{width:100%;height:auto;border-radius:var(--r);border:1px solid var(--border)}
+.cs-figure figcaption{margin-top:10px;font-family:var(--font-mono);font-size:.75rem;letter-spacing:.04em;color:var(--muted)}
+.cs-quote{margin-top:28px;padding:6px 0 6px 22px;border-left:2px solid var(--sage)}
+.cs-quote p{font-family:var(--font-display);font-style:italic;font-weight:340;font-size:1.2rem;line-height:1.5;color:var(--cream);margin-top:0}
+.cs-quote cite{display:block;margin-top:8px;font-style:normal;font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+
+/* Admin draft preview */
+.preview-banner{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:200;padding:10px 18px;border-radius:999px;background:var(--moss-deep);border:1px solid var(--border-2);color:var(--cream);font-family:var(--font-mono);font-size:12px;letter-spacing:.04em}
+.preview-banner a{color:var(--sage);text-decoration:underline}

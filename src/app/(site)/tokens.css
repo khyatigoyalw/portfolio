@@ -1,0 +1,27 @@
+/* Design tokens shared by every page. Font variables come from next/font (see src/app/layout.tsx). */
+:root{
+  --ink:#0A0C0A;
+  --ink-2:#0D110C;
+  --ink-3:#11150F;
+  --panel:rgba(238,231,214,0.035);
+  --panel-2:rgba(238,231,214,0.055);
+  --border:rgba(228,217,194,0.10);
+  --border-2:rgba(228,217,194,0.18);
+  --cream:#F2EEE4;
+  --cream-dim:#DDD7C8;
+  --muted:#98A08F;
+  --faint:#69715F;
+  --sage:#AECF9E;
+  --sage-2:#CDE9BC;
+  --moss:#4C6B44;
+  --moss-deep:#2A3A26;
+  --beige:#E4D9C2;
+  --beige-deep:#C6B48F;
+  --font-display:var(--f-fraunces),Georgia,'Times New Roman',serif;
+  --font-sans:var(--f-manrope),-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:var(--f-space-mono),'SFMono-Regular',Menlo,monospace;
+  --maxw:1240px;
+  --gutter:clamp(20px,5vw,64px);
+  --r:18px;
+  --ease:cubic-bezier(.19,1,.22,1);
+}
