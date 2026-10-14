@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { gate } from "@/components/admin/gate";
-import { loadPosts } from "@/lib/admin/queries";
+import { countMessages, loadPosts } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Overview" };
 
 export default async function Page() {
   const g = await gate();
   if (!g.ok) return g.view;
-  const posts = await loadPosts(g.db);
+  const [posts, messages] = await Promise.all([loadPosts(g.db), countMessages(g.db)]);
   const count = (type: string, status: string) => posts.filter((p) => p.type === type && p.status === status).length;
   const recent = [...posts].sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "")).slice(0, 5);
   const base = { case_study: "/admin/case-studies", article: "/admin/articles" } as const;
@@ -25,6 +25,8 @@ export default async function Page() {
         <div className="adm-stat"><b>{count("case_study", "draft")}</b><span>Case studies draft</span></div>
         <div className="adm-stat"><b>{count("article", "published")}</b><span>Articles published</span></div>
         <div className="adm-stat"><b>{count("article", "draft")}</b><span>Articles draft</span></div>
+        <Link className="adm-stat" href="/admin/messages"><b>{messages.unread}</b><span>New messages</span></Link>
+        <Link className="adm-stat" href="/admin/messages"><b>{messages.total}</b><span>Total messages</span></Link>
       </div>
       <section className="adm-card">
         <h2>Last 5 edits</h2>
