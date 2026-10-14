@@ -63,7 +63,7 @@
 .adm-field{display:grid;gap:5px;align-content:start;min-width:0}
 .adm-field>label,.adm-legend{font-size:13px;font-weight:600;color:var(--cream-dim)}
 .adm-hint{font-size:12px;color:var(--muted);margin:0}
-.adm input[type=text],.adm input[type=email],.adm input[type=number],.adm input[type=search],.adm input[type=url],.adm select,.adm textarea{
+.adm input[type=text],.adm input[type=email],.adm input[type=password],.adm input[type=tel],.adm input[type=number],.adm input[type=search],.adm input[type=url],.adm select,.adm textarea{
   width:100%;font:inherit;color:var(--cream);background:var(--ink-3);border:1px solid var(--border-2);border-radius:9px;padding:9px 11px;min-height:40px}
 .adm textarea{resize:vertical;min-height:84px;line-height:1.5}
 .adm input.mono,.adm textarea.mono{font-family:var(--font-mono);font-size:13px}
@@ -98,6 +98,7 @@ fieldset.adm-fs>legend{padding:0 8px;font:600 12px var(--font-mono);letter-spaci
 /* save bar */
 .adm-savebar{position:sticky;bottom:0;z-index:5;margin:24px calc(-1 * clamp(16px,3.5vw,48px)) -96px;padding:12px clamp(16px,3.5vw,48px);background:rgba(10,12,10,.92);backdrop-filter:blur(8px);border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .adm-savebar .grow{flex:1}
+.adm details.adm-card>summary{cursor:pointer;list-style-position:inside}
 .adm-dirty{font:12px var(--font-mono);color:var(--danger)}
 
 /* toasts */
