@@ -11,13 +11,15 @@ export function SiteEffects() {
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting) {
+          // 12% of a very tall block (the gallery as one column on phones) can exceed the viewport,
+          // so also reveal once it fills a quarter of the screen.
+          if (e.isIntersecting && (e.intersectionRatio >= 0.12 || e.intersectionRect.height >= window.innerHeight * 0.25)) {
             e.target.classList.add("in");
             io.unobserve(e.target);
           }
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+      { threshold: [0, 0.05, 0.12, 0.25], rootMargin: "0px 0px -8% 0px" },
     );
     document.querySelectorAll(".reveal:not(.in)").forEach((el) => io.observe(el));
     return () => io.disconnect();
