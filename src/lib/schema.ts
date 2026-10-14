@@ -239,7 +239,7 @@ export type MetricsContent = z.infer<typeof MetricsContent>;
 /* gallery ------------------------------------------------------------ */
 /**
  * Ordered tiles; each points at a published case-study (post.type = 'case_study').
- * Image, aspect ratio and default label come from the post (coverMediaId, cardAspect, cardLabel);
+ * Image and default label come from the post (coverMediaId, cardLabel); tiles share one 4:5 frame.
  * the optional fields below override them for that tile only.
  */
 export const GalleryTile = z.object({

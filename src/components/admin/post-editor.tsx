@@ -66,7 +66,6 @@ export function PostEditor({ initial }: { initial: PostDraft }) {
         {isCase ? (
           <>
             <TextInput label="Gallery card label" value={d.cardLabel ?? ""} onChange={(v) => set({ cardLabel: v || null })} />
-            <TextInput label="Card aspect ratio" mono value={d.cardAspect ?? ""} onChange={(v) => set({ cardAspect: v || null })} hint='width/height, e.g. "1080/2400"' />
           </>
         ) : (
           <>
