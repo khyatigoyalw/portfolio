@@ -34,6 +34,22 @@ async function rewriteSlugRefs(db: SupabaseClient, type: z.infer<typeof PostType
   if (changed) check((await db.from("sections").update({ content }).eq("key", key)).error, "Updating home page references");
 }
 
+/** On a post's first publish, add it to the end of the home page's gallery / writing list so it shows up there. */
+async function listOnHome(db: SupabaseClient, type: z.infer<typeof PostType>, slug: string) {
+  const key = type === "case_study" ? "gallery" : "writing";
+  const { data } = await db.from("sections").select("content").eq("key", key).maybeSingle();
+  if (!data) return;
+  const content = data.content as { tiles?: { slug: string }[]; slugs?: string[] };
+  if (key === "gallery") {
+    if (content.tiles?.some((t) => t.slug === slug)) return;
+    content.tiles = [...(content.tiles ?? []), { slug, title: null, label: null, variant: "default" } as { slug: string }];
+  } else {
+    if (content.slugs?.includes(slug)) return;
+    content.slugs = [...(content.slugs ?? []), slug];
+  }
+  check((await db.from("sections").update({ content }).eq("key", key)).error, "Adding to the home page");
+}
+
 export async function savePost(input: unknown) {
   return guarded<{ id: string; slug: string }>(async (db) => {
     const data = PostInput.parse(input);
@@ -48,13 +64,15 @@ export async function savePost(input: unknown) {
     let sortOrder = SORT_STEP;
     let oldSlug: string | null = null;
     let oldType = data.type;
+    let wasPublished = false;
     if (isNew) {
       const last = await db.from("posts").select("sort_order").eq("type", data.type).order("sort_order", { ascending: false }).limit(1).maybeSingle();
       sortOrder = (last.data?.sort_order ?? 0) + SORT_STEP;
     } else {
-      const prev = await db.from("posts").select("slug,type,sort_order").eq("id", id).single();
+      const prev = await db.from("posts").select("slug,type,sort_order,published_at").eq("id", id).single();
       check(prev.error, "Loading post");
       sortOrder = prev.data!.sort_order;
+      wasPublished = prev.data!.published_at !== null;
       oldSlug = prev.data!.slug;
       oldType = prev.data!.type;
       if (oldType !== data.type) throw new Error("A post's type cannot be changed.");
@@ -67,6 +85,7 @@ export async function savePost(input: unknown) {
     check(error, "Saving post");
 
     if (oldSlug && oldSlug !== post.slug) await rewriteSlugRefs(db, post.type, oldSlug, post.slug);
+    if (post.status === "published" && !wasPublished) await listOnHome(db, post.type, post.slug);
     const tags = [{ type: post.type, slug: post.slug }, ...(oldSlug && oldSlug !== post.slug ? [{ type: post.type, slug: oldSlug }] : [])];
     bust({ posts: true, sections: true, media: true, post: tags });
     return {
@@ -81,8 +100,11 @@ export async function setPostStatus(id: unknown, status: unknown) {
   return guarded(async (db) => {
     const pid = z.string().uuid().parse(id);
     const st = PostStatus.parse(status);
+    const before = await db.from("posts").select("published_at").eq("id", pid).single();
+    check(before.error, "Loading post");
     const { data, error } = await db.from("posts").update({ status: st }).eq("id", pid).select("type,slug").single();
     check(error, "Updating status");
+    if (st === "published" && before.data!.published_at === null) await listOnHome(db, data!.type, data!.slug);
     bust({ posts: true, sections: true, post: [{ type: data!.type, slug: data!.slug }] });
     return { message: st === "published" ? "Published." : "Unpublished (now a draft)." };
   });

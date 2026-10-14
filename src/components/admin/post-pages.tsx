@@ -4,7 +4,8 @@ import { loadMedia, loadPost, loadPosts } from "@/lib/admin/queries";
 import type { PostType } from "@/lib/schema";
 import { gate } from "./gate";
 import { MediaProvider } from "./media-picker";
-import { PostEditor, emptyPost, toDraft } from "./post-editor";
+import { PostEditor } from "./post-editor";
+import { emptyPost, toDraft } from "./post-draft";
 import { PostsList } from "./posts-list";
 
 const META = {

@@ -4,27 +4,13 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { deletePost, savePost } from "@/app/admin/_actions/posts";
 import { slugify } from "@/lib/admin/slugify";
-import type { Block, Post, PostType } from "@/lib/schema";
+import type { Block, Post } from "@/lib/schema";
+import type { PostDraft } from "./post-draft";
 import { BlockEditor } from "./block-editor";
 import { Fieldset, ListEditor, NumberInput, SelectField, StringList, TextArea, TextInput } from "./fields";
 import { MediaField } from "./media-picker";
 import { ConfirmButton, SaveBar, same } from "./save-bar";
 import { useAction } from "./toast";
-
-export type PostDraft = Omit<Post, "id" | "sortOrder" | "publishedAt" | "createdAt" | "updatedAt"> & { id: string | null };
-
-export const emptyPost = (type: PostType): PostDraft => ({
-  id: null, type, slug: "", status: "draft", title: "", subtitle: "", tag: "",
-  cardLabel: type === "case_study" ? "" : null, excerpt: type === "article" ? "" : null,
-  readTimeMinutes: null, coverMediaId: null, cardAspect: null, meta: [], body: [], skills: [], takeaway: "",
-  seoTitle: null, seoDescription: null,
-});
-
-export const toDraft = (p: Post): PostDraft => {
-  const { sortOrder: _s, publishedAt: _p, createdAt: _c, updatedAt: _u, ...rest } = p;
-  void _s; void _p; void _c; void _u;
-  return rest;
-};
 
 /** Drop empty list rows / blank optional strings before they reach the schema. */
 function clean(d: PostDraft): PostDraft {

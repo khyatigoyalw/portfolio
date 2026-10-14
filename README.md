@@ -56,7 +56,7 @@ Other scripts: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run se
 | Overview | Published / draft counts, last 5 edits |
 | Profile & settings | Hero (headline, tags, buttons, stat chips), nav, marquee, contact, footer, SEO / Open Graph, résumé file |
 | Home sections | Show/hide and order the home page blocks; one editor per section |
-| Case studies / Articles | List, search, filter, reorder, create, edit (block editor body), publish / unpublish, delete, Preview |
+| Case studies / Articles | List, search, filter, reorder, create, edit (block editor body), publish / unpublish, delete, Preview. A post's first publish adds it to the end of the home gallery (case studies) or Writing list (articles); reorder or remove it under Home sections |
 | Media | Upload (images up to 15 MB, PDF), alt text, replace, delete (blocked while a file is in use) |
 
 Free-text fields accept a small inline markup: `**bold**`, `*italic*`, `==highlight==` (hero only), `[label](url)`, newline = line break.
