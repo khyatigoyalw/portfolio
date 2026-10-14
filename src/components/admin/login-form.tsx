@@ -1,43 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useActionState } from "react";
+import { signIn } from "@/app/admin/_actions/auth";
 
 export function LoginForm({ initialError }: { initialError?: string }) {
-  const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
-  const [error, setError] = useState(initialError ?? "");
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setState("sending");
-    setError("");
-    const { error } = await createClient().auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/admin` },
-    });
-    if (error) {
-      setError(error.message);
-      setState("idle");
-    } else setState("sent");
-  }
-
-  if (state === "sent")
-    return (
-      <p role="status">
-        Check <b>{email}</b> for a sign-in link. It works once; open it in this browser.
-      </p>
-    );
+  const [state, action, pending] = useActionState(signIn, null);
+  const error = state?.error ?? initialError;
 
   return (
-    <form onSubmit={submit}>
+    <form action={action}>
       <div className="adm-field">
         <label htmlFor="email">Email</label>
-        <input id="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input id="email" name="email" type="email" required autoComplete="email" />
+      </div>
+      <div className="adm-field" style={{ marginTop: 12 }}>
+        <label htmlFor="password">Password</label>
+        <input id="password" name="password" type="password" required autoComplete="current-password" />
       </div>
       <p style={{ marginTop: 14 }}>
-        <button className="adm-btn primary" type="submit" disabled={state === "sending"}>
-          {state === "sending" ? "Sending…" : "Email me a sign-in link"}
+        <button className="adm-btn primary" type="submit" disabled={pending}>
+          {pending ? "Signing in…" : "Sign in"}
         </button>
       </p>
       {error && (

@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <div className="adm-login">
       <div className="adm-card">
         <h1>Sign in</h1>
-        <p>Enter your admin email and we will send you a one-time link.</p>
+        <p>Enter your admin email and password.</p>
         {a.status === "forbidden" && (
           <p className="adm-error" role="alert">
             {a.email} is not an admin.

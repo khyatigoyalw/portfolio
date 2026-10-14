@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { gate } from "@/components/admin/gate";
 import { MediaProvider } from "@/components/admin/media-picker";
+import { PasswordForm } from "@/components/admin/password-form";
 import { SettingsForm } from "@/components/admin/settings-form";
 import { loadMedia, loadSettings } from "@/lib/admin/queries";
 
@@ -21,6 +22,10 @@ export default async function Page() {
       <MediaProvider media={media}>
         <SettingsForm initial={settings} />
       </MediaProvider>
+      <div className="adm-card">
+        <h2>Change password</h2>
+        <PasswordForm />
+      </div>
     </>
   );
 }
