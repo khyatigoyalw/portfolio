@@ -49,3 +49,43 @@ export async function findMediaReferences(db: SupabaseClient, id: string): Promi
   for (const s of sections.data ?? []) if (JSON.stringify(s.content ?? {}).includes(id)) refs.push(`Home section “${s.key}”`);
   return refs;
 }
+
+export type ContactMessageStatus = "new" | "read" | "archived";
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  status: ContactMessageStatus;
+  emailSent: boolean;
+  createdAt: string;
+};
+
+export async function loadMessages(db: SupabaseClient): Promise<ContactMessage[]> {
+  const rows = must(await db.from("contact_messages").select("*").order("created_at", { ascending: false }), "messages");
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    message: r.message,
+    status: r.status,
+    emailSent: r.email_sent,
+    createdAt: r.created_at,
+  }));
+}
+
+/** Inbox counters for the Overview tiles. */
+export async function countMessages(db: SupabaseClient): Promise<{ total: number; unread: number }> {
+  const [all, unread] = await Promise.all([
+    db.from("contact_messages").select("id", { count: "exact", head: true }),
+    db.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
+  ]);
+  if (all.error) throw new Error(`Failed to load messages: ${all.error.message}`);
+  return { total: all.count ?? 0, unread: unread.count ?? 0 };
+}
+
+/** Messages received in the last 7 days. */
+export const recentMessages = (list: ContactMessage[], days = 7) =>
+  list.filter((m) => new Date(m.createdAt).getTime() >= Date.now() - days * 864e5).length;

@@ -53,15 +53,28 @@ Other scripts: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run se
 
 | Page | What it edits |
 | --- | --- |
-| Overview | Published / draft counts, last 5 edits |
+| Overview | Published / draft counts, new / total messages, last 5 edits |
 | Profile & settings | Hero (headline, tags, buttons, stat chips), nav, marquee, contact, footer, SEO / Open Graph, résumé file |
 | Home sections | Show/hide and order the home page blocks; one editor per section |
 | Case studies / Articles | List, search, filter, reorder, create, edit (block editor body), publish / unpublish, delete, Preview. A post's first publish adds it to the end of the home gallery (case studies) or Writing list (articles); reorder or remove it under Home sections |
+| Messages | Contact-form enquiries: read, mark read / new, archive, delete |
 | Media | Upload (images up to 15 MB, PDF), alt text, replace, delete (blocked while a file is in use) |
 
 Free-text fields accept a small inline markup: `**bold**`, `*italic*`, `==highlight==` (hero only), `[label](url)`, newline = line break.
 
 **Preview drafts:** the Preview button calls `/api/draft?type=…&slug=…`, which (for admins only) turns on Next Draft Mode and opens the public page. Leave preview with `/api/draft?disable=1`.
+
+## Contact form
+
+The home page contact section has a form. Each submission is stored in `contact_messages` (apply `supabase/migrations/0002_contact_messages.sql`), emailed to you through [Resend](https://resend.com), and listed under **Messages** in the admin. Visitors can only insert through the rate-limited `submit_contact_message()` function (5 per hour per IP and per email); a hidden honeypot field drops most bots. Emailing is best-effort: if it fails or is not configured, the message is still saved.
+
+| Variable | Purpose |
+| --- | --- |
+| `RESEND_API_KEY` | Resend API key. Unset = no email is sent. |
+| `CONTACT_NOTIFY_EMAIL` | Where enquiries are sent. Defaults to the contact email in Profile & settings. |
+| `CONTACT_FROM_EMAIL` | Sender. Defaults to `Portfolio <onboarding@resend.dev>`. |
+
+The Resend test sender `onboarding@resend.dev` only delivers to the email address of your own Resend account until you verify a domain and set `CONTACT_FROM_EMAIL` to an address on it.
 
 ## Deploy to Vercel
 

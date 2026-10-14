@@ -1,4 +1,5 @@
 import type { SectionOf, SiteContact } from "@/lib/schema";
+import { ContactForm } from "./contact-form";
 import { Inline } from "./inline";
 
 export function Contact({ section, contact }: { section: SectionOf<"contact">; contact: SiteContact }) {
@@ -16,6 +17,7 @@ export function Contact({ section, contact }: { section: SectionOf<"contact">; c
             <Inline text={section.intro} />
           </p>
         )}
+        <ContactForm />
         <div className="contact-links reveal d2">
           <a className="c-link" href={`mailto:${contact.email}`}>
             <span className="ci">✉</span> {contact.email}
