@@ -3,7 +3,7 @@
 A Next.js (App Router) portfolio site with a built-in admin dashboard. Every piece of public content (hero, home sections, case studies, articles, images, résumé) is editable at `/admin` and stored in Supabase. Saves show up on the public site immediately through on-demand revalidation.
 
 - Public site: Server Components, cached reads tagged `settings`, `sections`, `posts`, `post:<type>:<slug>`, `media`.
-- Admin (`/admin`): Supabase magic-link sign-in, allow-list of admin emails, forms validated with the Zod schemas in `src/lib/schema.ts`.
+- Admin (`/admin`): Supabase email + password sign-in, allow-list of admin emails, forms validated with the Zod schemas in `src/lib/schema.ts`.
 - Without Supabase the site still runs, read-only, from `content/seed.json` and `public/media/`.
 
 Stack: Next 16, React 19, TypeScript, Supabase (Postgres, Auth, Storage), Zod 4. No CSS framework.
@@ -32,22 +32,27 @@ Other scripts: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run se
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY` (only used by `npm run seed:push` on your machine; never expose it or add it to the browser/`NEXT_PUBLIC_*`)
    - `NEXT_PUBLIC_SITE_URL` (e.g. `https://your-domain.com`)
-5. **Allow the sign-in redirect.** Authentication, URL configuration: set *Site URL* to your site URL and add these to *Redirect URLs*:
+5. **Set your password.** Sign-in is email + password. In the SQL editor (same email as step 3):
+   ```sql
+   update auth.users set encrypted_password = crypt('YOUR-PASSWORD', gen_salt('bf')) where email = 'you@example.com';
+   ```
+   Change it any time under Profile & settings, Change password. (The auth user must exist: Authentication, Users, Add user.)
+6. **Allow the auth redirect** (only needed for password-recovery links). Authentication, URL configuration: set *Site URL* to your site URL and add these to *Redirect URLs*:
    - `http://localhost:3000/auth/callback`
    - `https://your-domain.com/auth/callback`
    (Preview deployments: add `https://*-your-team.vercel.app/auth/callback`.) Email auth must be enabled (it is by default).
-6. **Push the seed content** (uploads the images and inserts all rows; re-running overwrites seeded rows):
+7. **Push the seed content** (uploads the images and inserts all rows; re-running overwrites seeded rows):
    ```bash
    npm run seed:push
    ```
    Use `npm run seed:push -- --dry-run` to validate without touching the project.
-7. Restart `npm run dev`, open `/admin/login`, enter your email and follow the link.
+8. Restart `npm run dev`, open `/admin/login` and sign in with your email and password.
 
 ### How access is enforced
 
 - `src/proxy.ts` refreshes the session and redirects signed-out visitors from `/admin/*` to `/admin/login`.
 - Every admin page and every Server Action re-verifies on the server: `auth.getUser()` then `select public.is_admin()`. Non-admins see "Not authorised".
-- Postgres row level security is the real gate: only `is_admin()` users can write any table or the `media` bucket, whatever the app does. Anyone may request a magic link; only emails in `admins` can do anything with it.
+- Postgres row level security is the real gate: only `is_admin()` users can write any table or the `media` bucket, whatever the app does. Anyone may attempt to sign in; only emails in `admins` can do anything once signed in.
 
 ## Using the admin
 
@@ -80,7 +85,7 @@ The Resend test sender `onboarding@resend.dev` only delivers to the email addres
 
 1. Import the repository in Vercel (framework preset: Next.js, default build settings).
 2. Add the four environment variables from step 4 above to the project (Production and Preview). `SUPABASE_SERVICE_ROLE_KEY` is not needed at runtime and can be left out.
-3. Add your production URL and the `/auth/callback` redirect in Supabase (step 5).
+3. Add your production URL and the `/auth/callback` redirect in Supabase (step 6).
 4. Deploy. Old `/index.html`, `/case-studies/<slug>.html` and `/articles/<slug>.html` URLs redirect to the new routes.
 
 ## How editing reflects live
@@ -97,7 +102,7 @@ scripts/                     seed-from-legacy.ts, push-seed.ts
 src/lib/                     schema (Zod), mappers, data access, Supabase clients
 src/lib/admin/               admin-only helpers (auth check, queries, revalidation, slugify)
 src/app/admin/               admin pages and Server Actions (_actions/)
-src/app/auth/callback/       magic-link code exchange
+src/app/auth/callback/       auth code exchange (recovery links)
 src/app/api/draft/           draft-mode entry for previews
 src/proxy.ts                 session refresh + /admin redirect
 ```
