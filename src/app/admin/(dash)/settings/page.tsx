@@ -19,13 +19,16 @@ export default async function Page() {
           <p>Hero, navigation, marquee, contact details, footer and SEO. Saving updates the live site immediately.</p>
         </div>
       </div>
+      {/* Above the settings form: its sticky save bar must stay the last thing on the page. */}
+      <details className="adm-card">
+        <summary><h2 style={{ display: "inline" }}>Change password</h2></summary>
+        <div style={{ marginTop: 16 }}>
+          <PasswordForm />
+        </div>
+      </details>
       <MediaProvider media={media}>
         <SettingsForm initial={settings} />
       </MediaProvider>
-      <div className="adm-card">
-        <h2>Change password</h2>
-        <PasswordForm />
-      </div>
     </>
   );
 }
