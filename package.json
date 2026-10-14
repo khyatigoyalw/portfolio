@@ -1,0 +1,33 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "seed:legacy": "tsx scripts/seed-from-legacy.ts",
+    "seed:push": "tsx scripts/push-seed.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "~0.12.7",
+    "@supabase/supabase-js": "~2.117.3",
+    "next": "~16.4.0",
+    "react": "~19.3.1",
+    "react-dom": "~19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "~16.4.0",
+    "node-html-parser": "^9.0.4",
+    "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
