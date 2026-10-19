@@ -1,5 +1,5 @@
 /**
- * Pushes content/seed.json and public/media/* to a Supabase project.
+ * Pushes content/seed.json and apps/client/public/media/* to a Supabase project.
  *
  *   NEXT_PUBLIC_SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npm run seed:push
  *   npm run seed:push -- --dry-run     (validate + list what would happen; no network)
@@ -12,11 +12,11 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
-import { mediaToRow, postToRow, sectionToRow, settingsToRow } from "../src/lib/mappers";
-import { SeedFile } from "../src/lib/schema";
+import { mediaToRow, postToRow, sectionToRow, settingsToRow } from "../packages/core/src/mappers";
+import { SeedFile } from "../packages/core/src/schema";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const MEDIA_DIR = path.join(ROOT, "public", "media");
+const MEDIA_DIR = path.join(ROOT, "apps", "client", "public", "media");
 const dryRun = process.argv.includes("--dry-run");
 
 for (const f of [".env.local", ".env"]) {
@@ -54,7 +54,7 @@ async function main() {
   // Every media row must have its file on disk before we touch the project.
   for (const m of seed.media) {
     await fs.access(path.join(MEDIA_DIR, m.path)).catch(() => {
-      console.error(`public/media/${m.path} is missing. Run \`npm run seed:legacy\` first.`);
+      console.error(`apps/client/public/media/${m.path} is missing. Run \`npm run seed:legacy\` first.`);
       process.exit(1);
     });
   }

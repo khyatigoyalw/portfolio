@@ -1,0 +1,34 @@
+{
+  "name": "@portfolio/core",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    "./schema": "./src/schema.ts",
+    "./mappers": "./src/mappers.ts",
+    "./media-url": "./src/media-url.ts",
+    "./inline": "./src/inline.ts",
+    "./revalidate": "./src/revalidate.ts",
+    "./supabase/server": "./src/supabase/server.ts",
+    "./supabase/client": "./src/supabase/client.ts",
+    "./supabase/middleware": "./src/supabase/middleware.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/ssr": "~0.12.7",
+    "@supabase/supabase-js": "~2.117.3",
+    "zod": "^4.6.7"
+  },
+  "peerDependencies": {
+    "next": ">=16",
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.3.0",
+    "next": "~16.4.0",
+    "react": "~19.3.1",
+    "typescript": "^5.9.3"
+  }
+}

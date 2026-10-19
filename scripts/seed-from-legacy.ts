@@ -1,10 +1,10 @@
 /**
  * Parses the legacy static site (legacy/index.html, legacy/case-studies/*.html, legacy/articles/*.html)
- * into content/seed.json, copies the images it uses to public/media/ and records width/height/blur.
+ * into content/seed.json, copies the images it uses to apps/client/public/media/ and records width/height/blur.
  *
  *   npm run seed:legacy
  *
- * The result is validated against src/lib/schema.ts (SeedFile) and the script exits non-zero on
+ * The result is validated against packages/core/src/schema.ts (SeedFile) and the script exits non-zero on
  * any failure. Anything odd in the source is REPORTED, never silently fixed.
  */
 import { createHash } from "node:crypto";
@@ -12,7 +12,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { HTMLElement, NodeType, parse, type Node } from "node-html-parser";
 import sharp from "sharp";
-import { escapeInline } from "../src/lib/inline";
+import { escapeInline } from "../packages/core/src/inline";
 import {
   Block,
   SeedFile,
@@ -26,13 +26,13 @@ import {
   type SectionKey,
   type Stat,
   type WorkBlock,
-} from "../src/lib/schema";
+} from "../packages/core/src/schema";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const LEGACY = path.join(ROOT, "legacy");
 const ASSETS = path.join(LEGACY, "assets");
 const OUT_JSON = path.join(ROOT, "content", "seed.json");
-const OUT_MEDIA = path.join(ROOT, "public", "media");
+const OUT_MEDIA = path.join(ROOT, "apps", "client", "public", "media");
 
 /* ------------------------------------------------------------------ */
 /* report                                                              */
@@ -70,7 +70,7 @@ function plain(el: HTMLElement, skip?: string): string {
   return collapse(walk(el));
 }
 
-/** Inner HTML -> inline markup (see src/lib/inline.ts). Entities are decoded; whitespace collapsed. */
+/** Inner HTML -> inline markup (see packages/core/src/inline.ts). Entities are decoded; whitespace collapsed. */
 function inline(el: HTMLElement, where: string, skip?: string): string {
   const walk = (n: Node): string => {
     if (n.nodeType === NodeType.TEXT_NODE) return escapeInline(n.text.replace(/\s+/g, " "));
@@ -140,7 +140,7 @@ const usedAssets = new Set<string>();
 const safeName = (file: string) => file.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/-+/g, "-");
 const MIME: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".pdf": "application/pdf" };
 
-/** Register an asset (src like "assets/foo.webp"), copy it to public/media and return its media id. */
+/** Register an asset (src like "assets/foo.webp"), copy it to apps/client/public/media and return its media id. */
 async function registerAsset(src: string, alt: string, where: string): Promise<string> {
   const rel = decodeURIComponent(src).replace(/^(\.\.\/)?assets\//, "");
   const abs = path.join(ASSETS, rel);
