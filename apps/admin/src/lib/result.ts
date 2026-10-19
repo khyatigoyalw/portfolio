@@ -1,7 +1,7 @@
 import type { ZodError } from "zod";
 
 /** What every admin Server Action returns. */
-export type ActionResult<T = object> = ({ ok: true; message: string } & T) | { ok: false; error: string };
+export type ActionResult<T = object> = ({ ok: true; message: string; warning?: string } & T) | { ok: false; error: string };
 
 /** "hero.ctas.0.label: Too small…" lines, readable in a toast. */
 export function formatZod(err: ZodError, max = 5): string {

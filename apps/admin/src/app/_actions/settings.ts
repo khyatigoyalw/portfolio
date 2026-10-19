@@ -2,7 +2,7 @@
 
 import { SiteSettings } from "@portfolio/core/schema";
 import { settingsToRow } from "@portfolio/core/mappers";
-import { bust } from "@/lib/revalidate";
+import { bust, bustWarning } from "@/lib/revalidate";
 import { check, guarded } from "./guard";
 
 export async function saveSettings(input: unknown) {
@@ -10,7 +10,7 @@ export async function saveSettings(input: unknown) {
     const settings = SiteSettings.parse(input);
     const { error } = await db.from("site_settings").upsert(settingsToRow(settings));
     check(error, "Saving settings");
-    bust({ settings: true, media: true });
-    return { message: "Settings saved. The live site is updated." };
+    const live = bustWarning(await bust({ settings: true, media: true }));
+    return { ...live, message: "Settings saved. The live site is updated." };
   });
 }

@@ -7,6 +7,7 @@
     "./mappers": "./src/mappers.ts",
     "./media-url": "./src/media-url.ts",
     "./inline": "./src/inline.ts",
+    "./revalidate": "./src/revalidate.ts",
     "./supabase/server": "./src/supabase/server.ts",
     "./supabase/client": "./src/supabase/client.ts",
     "./supabase/middleware": "./src/supabase/middleware.ts"

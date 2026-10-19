@@ -113,7 +113,7 @@ export async function PostPage({ type, slug }: { type: PostType; slug: string })
       {preview && (
         <div className="preview-banner" role="status">
           Draft preview{post.status === "draft" ? " (not published)" : ""} ·{" "}
-          <a href={`/api/draft?disable=1&redirect=${post.status === "draft" ? "/admin" : `${BASE[type]}/${post.slug}`}`}>Exit preview</a>
+          <a href={`/api/draft?disable=1&redirect=${post.status === "draft" ? "/" : `${BASE[type]}/${post.slug}`}`}>Exit preview</a>
         </div>
       )}
       <header className="cs-hero">

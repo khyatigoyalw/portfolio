@@ -18,6 +18,7 @@ export const mediaFromRow = (r: Row): Media =>
     alt: r.alt ?? "",
     blurDataUrl: r.blur_data_url ?? null,
     bytes: r.bytes == null ? null : Number(r.bytes),
+    originalBytes: r.original_bytes == null ? null : Number(r.original_bytes),
     createdAt: r.created_at ?? undefined,
   });
 
@@ -30,6 +31,8 @@ export const mediaToRow = (m: Media) => ({
   alt: m.alt,
   blur_data_url: m.blurDataUrl,
   bytes: m.bytes,
+  // Only sent when known, so seed pushes work before migration 0003 and never reset it.
+  ...(m.originalBytes != null && { original_bytes: m.originalBytes }),
 });
 
 /* site settings -------------------------------------------------------- */

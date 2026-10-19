@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { SECTION_KEYS, Section, SectionKey } from "@portfolio/core/schema";
 import { sectionToRow } from "@portfolio/core/mappers";
-import { bust } from "@/lib/revalidate";
+import { bust, bustWarning } from "@/lib/revalidate";
 import { check, guarded } from "./guard";
 
 /** Full section (key, texts, visible, sortOrder, content) validated by the discriminated union. */
@@ -12,8 +12,8 @@ export async function saveSection(input: unknown) {
     const section = Section.parse(input);
     const { error } = await db.from("sections").upsert(sectionToRow(section));
     check(error, "Saving section");
-    bust({ sections: true, media: true });
-    return { message: `“${section.key}” saved.` };
+    const live = bustWarning(await bust({ sections: true, media: true }));
+    return { ...live, message: `“${section.key}” saved.` };
   });
 }
 
@@ -23,8 +23,8 @@ export async function setSectionVisible(key: unknown, visible: unknown) {
     const v = z.boolean().parse(visible);
     const { error } = await db.from("sections").update({ visible: v }).eq("key", k);
     check(error, "Updating visibility");
-    bust({ sections: true });
-    return { message: `“${k}” is now ${v ? "visible" : "hidden"}.` };
+    const live = bustWarning(await bust({ sections: true }));
+    return { ...live, message: `“${k}” is now ${v ? "visible" : "hidden"}.` };
   });
 }
 
@@ -37,7 +37,7 @@ export async function reorderSections(keys: unknown) {
       const { error } = await db.from("sections").update({ sort_order: (i + 1) * 10 }).eq("key", key);
       check(error, "Reordering sections");
     }
-    bust({ sections: true });
-    return { message: "Section order saved." };
+    const live = bustWarning(await bust({ sections: true }));
+    return { ...live, message: "Section order saved." };
   });
 }

@@ -1,10 +1,11 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Post, PostStatus, PostType } from "@portfolio/core/schema";
 import { postToRow } from "@portfolio/core/mappers";
-import { bust } from "@/lib/revalidate";
+import { bust, bustWarning } from "@/lib/revalidate";
 import { check, guarded } from "./guard";
 
 /** What the editor sends: a Post without the columns the database / server owns. */
@@ -87,8 +88,9 @@ export async function savePost(input: unknown) {
     if (oldSlug && oldSlug !== post.slug) await rewriteSlugRefs(db, post.type, oldSlug, post.slug);
     if (post.status === "published" && !wasPublished) await listOnHome(db, post.type, post.slug);
     const tags = [{ type: post.type, slug: post.slug }, ...(oldSlug && oldSlug !== post.slug ? [{ type: post.type, slug: oldSlug }] : [])];
-    bust({ posts: true, sections: true, media: true, post: tags });
+    const live = bustWarning(await bust({ posts: true, sections: true, media: true, post: tags }));
     return {
+      ...live,
       id,
       slug: post.slug,
       message: isNew ? "Created." : post.status === "published" ? "Saved. Live on the site." : "Saved as draft.",
@@ -105,8 +107,8 @@ export async function setPostStatus(id: unknown, status: unknown) {
     const { data, error } = await db.from("posts").update({ status: st }).eq("id", pid).select("type,slug").single();
     check(error, "Updating status");
     if (st === "published" && before.data!.published_at === null) await listOnHome(db, data!.type, data!.slug);
-    bust({ posts: true, sections: true, post: [{ type: data!.type, slug: data!.slug }] });
-    return { message: st === "published" ? "Published." : "Unpublished (now a draft)." };
+    const live = bustWarning(await bust({ posts: true, sections: true, post: [{ type: data!.type, slug: data!.slug }] }));
+    return { ...live, message: st === "published" ? "Published." : "Unpublished (now a draft)." };
   });
 }
 
@@ -116,8 +118,8 @@ export async function deletePost(id: unknown) {
     const { data, error } = await db.from("posts").delete().eq("id", pid).select("type,slug,title").single();
     check(error, "Deleting post");
     await rewriteSlugRefs(db, data!.type, data!.slug, null);
-    bust({ posts: true, sections: true, post: [{ type: data!.type, slug: data!.slug }] });
-    return { message: `Deleted “${data!.title}”.` };
+    const live = bustWarning(await bust({ posts: true, sections: true, post: [{ type: data!.type, slug: data!.slug }] }));
+    return { ...live, message: `Deleted “${data!.title}”.` };
   });
 }
 
@@ -130,7 +132,22 @@ export async function reorderPosts(type: unknown, ids: unknown) {
       const { error } = await db.from("posts").update({ sort_order: (i + 1) * SORT_STEP }).eq("id", id).eq("type", t);
       check(error, "Reordering");
     }
-    bust({ posts: true, sections: true });
-    return { message: "Order saved." };
+    const live = bustWarning(await bust({ posts: true, sections: true }));
+    return { ...live, message: "Order saved." };
+  });
+}
+
+/**
+ * One-time-style preview link for the public site: a random token (valid 1 hour, see preview_tokens) that
+ * /api/draft on the client exchanges for Draft Mode. The client never needs an admin session.
+ */
+export async function createPreviewLink(postId: unknown) {
+  return guarded<{ url: string }>(async (db, email) => {
+    const id = z.string().uuid().parse(postId);
+    const base = process.env.NEXT_PUBLIC_CLIENT_URL?.replace(/\/$/, "");
+    if (!base) throw new Error("NEXT_PUBLIC_CLIENT_URL is not set, so the preview link cannot be built.");
+    const token = randomBytes(32).toString("base64url");
+    check((await db.from("preview_tokens").insert({ token, post_id: id, created_by: email })).error, "Creating preview link");
+    return { url: `${base}/api/draft?token=${token}`, message: "" };
   });
 }

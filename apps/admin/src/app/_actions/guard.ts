@@ -10,7 +10,7 @@ import { ZodError } from "zod";
  * (Not a "use server" file, so it is never callable from the browser itself.)
  */
 export async function guarded<T extends object = object>(
-  fn: (db: SupabaseClient, email: string) => Promise<{ message: string } & T>,
+  fn: (db: SupabaseClient, email: string) => Promise<{ message: string; warning?: string } & T>,
 ): Promise<ActionResult<T>> {
   const admin = await getAdmin();
   if (admin.status === "unconfigured") return { ok: false, error: "Supabase is not configured; the admin is read-only." };

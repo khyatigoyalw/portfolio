@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { refreshLiveSite } from "@/app/_actions/live";
+import { useAction } from "./toast";
 
 const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL ?? "http://localhost:3000";
 
@@ -17,6 +19,7 @@ const LINKS = [
 
 export function NavLinks() {
   const path = usePathname();
+  const refresh = useAction(refreshLiveSite);
   return (
     <nav className="adm-nav" aria-label="Admin">
       {LINKS.map((l) => {
@@ -30,6 +33,9 @@ export function NavLinks() {
       <a href={CLIENT_URL} target="_blank" rel="noreferrer">
         View site ↗
       </a>
+      <button type="button" disabled={refresh.pending} onClick={() => refresh.run()}>
+        {refresh.pending ? "Refreshing…" : "Refresh live site"}
+      </button>
     </nav>
   );
 }

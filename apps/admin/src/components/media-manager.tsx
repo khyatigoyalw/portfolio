@@ -12,34 +12,19 @@ import { Thumb, isImage } from "./media-picker";
 import { useAction, useToast } from "./toast";
 
 const MAX_BYTES = 15 * 1024 * 1024;
+const kb = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.round(n / 1024)} KB`);
 const ACCEPT = "image/webp,image/png,image/jpeg,image/gif,image/avif,image/svg+xml,application/pdf";
 
-/** Browser-side: natural size + a ~12px blurred placeholder (data URL). Non-images / SVG return nulls. */
-async function inspect(file: File): Promise<{ width: number | null; height: number | null; blur: string | null }> {
-  if (!file.type.startsWith("image/") || file.type === "image/svg+xml") return { width: null, height: null, blur: null };
-  try {
-    const bmp = await createImageBitmap(file);
-    const { width, height } = bmp;
-    const scale = 12 / Math.max(width, height);
-    const c = document.createElement("canvas");
-    c.width = Math.max(1, Math.round(width * scale));
-    c.height = Math.max(1, Math.round(height * scale));
-    c.getContext("2d")?.drawImage(bmp, 0, 0, c.width, c.height);
-    bmp.close();
-    return { width, height, blur: c.toDataURL("image/jpeg", 0.6) };
-  } catch {
-    return { width: null, height: null, blur: null }; // e.g. AVIF not decodable in this browser
-  }
-}
-
-/** Uploads straight to the `media` bucket as the signed-in admin (storage RLS = is_admin()). */
+/**
+ * Uploads the original straight to `incoming/` in the `media` bucket as the signed-in admin (storage RLS = is_admin()).
+ * The server action then optimises it (apps/admin/src/lib/optimise.ts) and moves it to `uploads/`.
+ */
 async function upload(file: File) {
   if (file.size > MAX_BYTES) throw new Error(`${file.name} is larger than 15 MB.`);
-  const path = `uploads/${Date.now().toString(36)}-${storageName(file.name)}`;
-  const { error } = await createClient().storage.from("media").upload(path, file, { contentType: file.type, cacheControl: "31536000" });
+  const incomingPath = `incoming/${Date.now().toString(36)}-${storageName(file.name)}`;
+  const { error } = await createClient().storage.from("media").upload(incomingPath, file, { contentType: file.type, cacheControl: "31536000" });
   if (error) throw new Error(`Upload failed: ${error.message}`);
-  const { width, height, blur } = await inspect(file);
-  return { path, mime: file.type, width, height, bytes: file.size, blurDataUrl: blur };
+  return { incomingPath, mime: file.type };
 }
 
 export function MediaManager({ initial }: { initial: Media[] }) {
@@ -54,8 +39,8 @@ export function MediaManager({ initial }: { initial: Media[] }) {
     setBusy(true);
     for (const f of Array.from(files)) {
       try {
-        const r = await registerMedia(await upload(f));
-        if (r.ok) setItems((x) => [r.media, ...x]);
+        const r = await registerMedia({ ...(await upload(f)), alt: "" });
+        if (r.ok) { setItems((x) => [r.media, ...x]); if (r.warning) toast("err", r.warning); }
         else toast("err", r.error);
       } catch (e) {
         toast("err", e instanceof Error ? e.message : "Upload failed.");
@@ -95,7 +80,7 @@ function MediaCard({ media: m, onChange, onDeleted }: { media: Media; onChange: 
     setReplacing(true);
     try {
       const r = await replaceMedia(m.id, await upload(f));
-      if (r.ok) { onChange(r.media); toast("ok", r.message); } else toast("err", r.error);
+      if (r.ok) { onChange(r.media); if (r.warning) toast("err", r.warning); else toast("ok", r.message); } else toast("err", r.error);
     } catch (e) {
       toast("err", e instanceof Error ? e.message : "Replace failed.");
     }
@@ -107,7 +92,7 @@ function MediaCard({ media: m, onChange, onDeleted }: { media: Media; onChange: 
       <div className="thumb"><Thumb media={m} /></div>
       <div className="meta">
         <a href={mediaUrl(m.path)} target="_blank" rel="noreferrer" style={{ overflowWrap: "anywhere" }}>{m.path}</a>
-        <span>{m.width && m.height ? `${m.width}×${m.height} · ` : ""}{m.bytes ? `${Math.round(m.bytes / 1024)} KB` : m.mime}</span>
+        <span>{m.width && m.height ? `${m.width}×${m.height} · ` : ""}{m.bytes ? `${kb(m.bytes)}${m.originalBytes && m.originalBytes !== m.bytes ? ` (from ${kb(m.originalBytes)})` : ""}` : m.mime}</span>
         {isImage(m) ? (
           <div className="adm-field">
             <label htmlFor={`alt-${m.id}`}>Alt text</label>

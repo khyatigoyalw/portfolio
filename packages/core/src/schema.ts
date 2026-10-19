@@ -48,8 +48,10 @@ export const Media = z.object({
   width: z.number().int().positive().nullable(),
   height: z.number().int().positive().nullable(),
   alt: z.string(), // "" for decorative / non-image
-  blurDataUrl: z.string().nullable(), // ~16px WebP data URL
+  blurDataUrl: z.string().nullable(), // ~12px JPEG data URL
   bytes: z.number().int().nonnegative().nullable(),
+  /** Size of the upload before server-side optimisation; null for older files. */
+  originalBytes: z.number().int().nonnegative().nullable().optional(),
   createdAt: z.string().optional(),
 });
 export type Media = z.infer<typeof Media>;

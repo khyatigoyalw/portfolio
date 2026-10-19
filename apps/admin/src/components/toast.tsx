@@ -49,7 +49,9 @@ export function useAction<A extends unknown[], R extends ActionResult<object>>(
           try {
             const r = await action(...args);
             if (r.ok) {
-              if (!silent && r.message) toast("ok", r.message);
+              // A warning means the save worked but the live-site refresh did not: shown as an error toast.
+              if (r.warning) toast("err", r.warning);
+              else if (!silent && r.message) toast("ok", r.message);
               onOk?.(r as Extract<R, { ok: true }>);
             } else toast("err", r.error);
           } catch (e) {

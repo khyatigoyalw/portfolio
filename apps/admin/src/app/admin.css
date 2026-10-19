@@ -29,8 +29,10 @@
 .adm-brand{font-family:var(--font-display);font-size:20px;padding:0 10px}
 .adm-brand small{display:block;font:11px var(--font-mono);color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
 .adm-nav{display:flex;flex-direction:column;gap:2px}
-.adm-nav a{padding:9px 12px;border-radius:9px;color:var(--cream-dim);font-weight:500}
-.adm-nav a:hover{background:var(--panel-2);text-decoration:none}
+.adm-nav a,.adm-nav button{padding:9px 12px;border-radius:9px;color:var(--cream-dim);font-weight:500}
+.adm-nav button{background:none;border:0;font:inherit;font-weight:500;text-align:left;cursor:pointer}
+.adm-nav button:disabled{opacity:.6;cursor:default}
+.adm-nav a:hover,.adm-nav button:hover:not(:disabled){background:var(--panel-2);text-decoration:none}
 .adm-nav a[aria-current="page"]{background:var(--moss-deep);color:var(--cream)}
 .adm-side-foot{margin-top:auto;font-size:13px;color:var(--muted);display:grid;gap:8px;padding:0 10px}
 .adm-side-foot span{overflow-wrap:anywhere}

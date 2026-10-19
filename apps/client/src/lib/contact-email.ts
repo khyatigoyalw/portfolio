@@ -12,14 +12,15 @@ export async function sendContactEmail(m: ContactEnquiry): Promise<boolean> {
   if (!key) return false;
   const to = process.env.CONTACT_NOTIFY_EMAIL || (await getSettings()).contact.email;
   const from = process.env.CONTACT_FROM_EMAIL || "Portfolio <onboarding@resend.dev>";
-  const inbox = `${(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "")}/admin/messages`;
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL?.replace(/\/$/, "");
+  const inbox = adminUrl ? `${adminUrl}/messages` : null;
 
-  const text = [`Name: ${m.name}`, `Email: ${m.email}`, m.phone ? `Phone: ${m.phone}` : null, "", m.message, "", `Inbox: ${inbox}`]
+  const text = [`Name: ${m.name}`, `Email: ${m.email}`, m.phone ? `Phone: ${m.phone}` : null, "", m.message, ...(inbox ? ["", `Inbox: ${inbox}`] : [])]
     .filter((l) => l !== null)
     .join("\n");
   const html = `<p><b>Name:</b> ${esc(m.name)}<br><b>Email:</b> ${esc(m.email)}${m.phone ? `<br><b>Phone:</b> ${esc(m.phone)}` : ""}</p>
 <p style="white-space:pre-wrap">${esc(m.message)}</p>
-<p><a href="${esc(inbox)}">Open the inbox</a></p>`;
+${inbox ? `<p><a href="${esc(inbox)}">Open the inbox</a></p>` : ""}`;
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",

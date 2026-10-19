@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { deletePost, savePost } from "@/app/_actions/posts";
+import { createPreviewLink, deletePost, savePost } from "@/app/_actions/posts";
 import { slugify } from "@/lib/slugify";
 import type { Block, Post } from "@portfolio/core/schema";
 import type { PostDraft } from "./post-draft";
@@ -10,7 +10,7 @@ import { BlockEditor } from "./block-editor";
 import { Fieldset, ListEditor, NumberInput, SelectField, StringList, TextArea, TextInput } from "./fields";
 import { MediaField } from "./media-picker";
 import { ConfirmButton, SaveBar, same } from "./save-bar";
-import { useAction } from "./toast";
+import { useAction, useToast } from "./toast";
 
 /** Drop empty list rows / blank optional strings before they reach the schema. */
 function clean(d: PostDraft): PostDraft {
@@ -23,11 +23,11 @@ function clean(d: PostDraft): PostDraft {
   return { ...d, slug: slugify(d.slug) || d.slug, body, skills: d.skills.map((s) => s.trim()).filter(Boolean) };
 }
 
-const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL ?? "http://localhost:3000";
 const BASE = { case_study: "/case-studies", article: "/articles" } as const;
 
 export function PostEditor({ initial }: { initial: PostDraft }) {
   const router = useRouter();
+  const toast = useToast();
   const noun = initial.type === "case_study" ? "case study" : "article";
   const [saved, setSaved] = useState(initial);
   const [d, setD] = useState(initial);
@@ -46,6 +46,26 @@ export function PostEditor({ initial }: { initial: PostDraft }) {
     },
   });
   const del = useAction(deletePost, { onOk: () => router.push(BASE[d.type]) });
+
+  // Open the tab synchronously (popup blockers), then point it at the one-time preview link.
+  const [previewing, setPreviewing] = useState(false);
+  async function preview() {
+    if (!d.id) return;
+    const tab = window.open("about:blank", "_blank");
+    setPreviewing(true);
+    try {
+      const r = await createPreviewLink(d.id);
+      if (r.ok && tab) tab.location.href = r.url;
+      else {
+        tab?.close();
+        toast("err", r.ok ? "Preview was blocked by the browser." : r.error);
+      }
+    } catch (e) {
+      tab?.close();
+      toast("err", e instanceof Error ? e.message : "Could not create the preview link.");
+    }
+    setPreviewing(false);
+  }
 
   const submit = (status?: Post["status"]) => {
     const payload = { ...clean(d), status: status ?? d.status };
@@ -108,7 +128,7 @@ export function PostEditor({ initial }: { initial: PostDraft }) {
           <button type="button" className="adm-btn" disabled={save.pending} onClick={() => { set({ status: "draft" }); submit("draft"); }}>Unpublish</button>
         )}
         {d.id ? (
-          <a className="adm-btn" target="_blank" rel="noreferrer" aria-label="Preview (opens in a new tab; save first)" href={`${CLIENT_URL}/api/draft?type=${d.type}&slug=${encodeURIComponent(saved.slug)}`}>Preview ↗</a>
+          <button type="button" className="adm-btn" disabled={previewing} aria-label="Preview (opens in a new tab; save first)" onClick={() => void preview()}>Preview ↗</button>
         ) : (
           <span className="adm-muted">Save once to enable preview</span>
         )}
